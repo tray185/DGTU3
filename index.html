@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Конвертер систем счисления</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #1c2333;
+      --muted: #6b7386;
+      --line: #dfe3ec;
+      --accent: #3b5bdb;
+      --accent-dark: #2f49b3;
+      --error: #c92a2a;
+      --error-bg: #fff1f1;
+      --radius: 14px;
+      --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 32px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    header,
+    main,
+    footer {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    main {
+      margin-block: auto;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow:
+        0 1px 2px rgba(28, 35, 51, 0.05),
+        0 12px 32px rgba(28, 35, 51, 0.09);
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font: inherit;
+      font-size: 1rem; /* не меньше 16px, чтобы iOS не увеличивал страницу */
+    }
+
+    input,
+    select {
+      border: 1.5px solid var(--line);
+      background: #fbfcfe;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input {
+      font-family: var(--mono);
+    }
+
+    input::placeholder {
+      color: #a3a9b8;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(59, 91, 219, 0.15);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: var(--error);
+      background: var(--error-bg);
+    }
+
+    input[aria-invalid="true"]:focus {
+      box-shadow: 0 0 0 4px rgba(201, 42, 42, 0.14);
+    }
+
+    button {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:focus-visible {
+      outline: 3px solid rgba(59, 91, 219, 0.4);
+      outline-offset: 2px;
+    }
+
+    .error {
+      margin: 0;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      background: var(--error-bg);
+      color: var(--error);
+      font-size: 0.92rem;
+    }
+
+    .error[hidden],
+    .results[hidden] {
+      display: none;
+    }
+
+    .results {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .results h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    dl {
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+
+    dt {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    dd {
+      margin: 2px 0 0;
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      overflow-wrap: anywhere;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer p {
+      margin: 0;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 20px 12px;
+        gap: 18px;
+      }
+
+      .card {
+        padding: 20px 16px;
+        border-radius: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Конвертер систем счисления</h1>
+    <p>Десятичная, двоичная и шестнадцатеричная</p>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Конвертер">
+      <form id="converter" novalidate>
+        <div class="field">
+          <label for="base">Исходная система</label>
+          <select id="base" name="base">
+            <option value="10">Десятичная (10)</option>
+            <option value="2">Двоичная (2)</option>
+            <option value="16">Шестнадцатеричная (16)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="number">Число</label>
+          <input
+            id="number"
+            name="number"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Например, 255"
+            aria-describedby="error"
+          >
+        </div>
+
+        <p id="error" class="error" role="alert" hidden></p>
+
+        <button type="submit">Конвертировать</button>
+      </form>
+
+      <section id="results" class="results" aria-live="polite" hidden>
+        <h2>Результат</h2>
+        <dl>
+          <div class="row">
+            <dt>Десятичная</dt>
+            <dd id="out-dec"></dd>
+          </div>
+          <div class="row">
+            <dt>Двоичная</dt>
+            <dd id="out-bin"></dd>
+          </div>
+          <div class="row">
+            <dt>Шестнадцатеричная</dt>
+            <dd id="out-hex"></dd>
+          </div>
+        </dl>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <p>Поддерживаются целые неотрицательные числа любой длины</p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var MAX_LENGTH = 300;
+
+      var BASES = {
+        '10': {
+          pattern: /^[0-9]+$/,
+          prefix: '',
+          placeholder: 'Например, 255',
+          inputmode: 'numeric',
+          hint: 'В десятичном числе допустимы только цифры 0–9.'
+        },
+        '2': {
+          pattern: /^[01]+$/,
+          prefix: '0b',
+          placeholder: 'Например, 11111111',
+          inputmode: 'numeric',
+          hint: 'В двоичном числе допустимы только цифры 0 и 1.'
+        },
+        '16': {
+          pattern: /^[0-9a-f]+$/i,
+          prefix: '0x',
+          placeholder: 'Например, FF',
+          inputmode: 'text',
+          hint: 'В шестнадцатеричном числе допустимы цифры 0–9 и буквы A–F.'
+        }
+      };
+
+      var form = document.getElementById('converter');
+      var baseSelect = document.getElementById('base');
+      var input = document.getElementById('number');
+      var errorBox = document.getElementById('error');
+      var results = document.getElementById('results');
+      var outDec = document.getElementById('out-dec');
+      var outBin = document.getElementById('out-bin');
+      var outHex = document.getElementById('out-hex');
+
+      // Возвращает { value: BigInt } либо { error: 'текст' }
+      function parse(raw, base) {
+        var config = BASES[base];
+        var text = raw.replace(/[\s_]/g, '');
+
+        if (text === '') {
+          return { error: 'Поле пустое. Введите число для конвертации.' };
+        }
+
+        if (/^[-−–—]/.test(text)) {
+          return { error: 'Отрицательные числа не поддерживаются. Введите число от 0 и больше.' };
+        }
+
+        if (text.charAt(0) === '+') {
+          text = text.slice(1);
+        }
+
+        // Разрешаем привычные префиксы 0b и 0x
+        if (config.prefix && text.toLowerCase().indexOf(config.prefix) === 0) {
+          text = text.slice(2);
+        }
+
+        if (text === '') {
+          return { error: 'Введите число для конвертации.' };
+        }
+
+        if (/[.,]/.test(text)) {
+          return { error: 'Дробные числа не поддерживаются. Введите целое число.' };
+        }
+
+        if (!config.pattern.test(text)) {
+          return { error: 'Некорректный ввод. ' + config.hint };
+        }
+
+        if (text.length > MAX_LENGTH) {
+          return { error: 'Слишком длинное число. Максимум — ' + MAX_LENGTH + ' знаков.' };
+        }
+
+        return { value: BigInt(config.prefix + text) };
+      }
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.hidden = false;
+        input.setAttribute('aria-invalid', 'true');
+        results.hidden = true;
+      }
+
+      function clearError() {
+        errorBox.hidden = true;
+        errorBox.textContent = '';
+        input.removeAttribute('aria-invalid');
+      }
+
+      function convert() {
+        var parsed = parse(input.value, baseSelect.value);
+
+        if (parsed.error) {
+          showError(parsed.error);
+          input.focus();
+          return;
+        }
+
+        clearError();
+        outDec.textContent = parsed.value.toString(10);
+        outBin.textContent = parsed.value.toString(2);
+        outHex.textContent = parsed.value.toString(16).toUpperCase();
+        results.hidden = false;
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        convert();
+      });
+
+      input.addEventListener('input', clearError);
+
+      baseSelect.addEventListener('change', function () {
+        var config = BASES[baseSelect.value];
+        input.placeholder = config.placeholder;
+        input.setAttribute('inputmode', config.inputmode);
+        clearError();
+        results.hidden = true;
+      });
+    })();
+  </script>
+</body>
+</html>
